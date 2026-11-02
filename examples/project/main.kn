@@ -1,0 +1,15 @@
+// A multi-file project: `keen run examples/project/main.kn`
+use <stdio.h>;
+
+mod geometry;
+mod util;
+
+use geometry::Rect;
+
+pub fn main(argc: i32, argv: *mut *mut c_char) -> i32 {
+    let r: Rect = geometry::make_rect(3, 4);
+    printf("area=%d perimeter=%d\n", geometry::area(&r), geometry::perimeter(&r));
+    printf("clamped=%d args=%d\n", util::clamp(150, 0, 100), argc - 1);
+    printf("%s\n", util::banner());
+    return 0;
+}

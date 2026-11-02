@@ -1,0 +1,8 @@
+// Nested file module: util::text lives in util/text.kn
+mod text;
+
+pub fn clamp(v: i32, lo: i32, hi: i32) -> i32 {
+    if v < lo { lo } else if v > hi { hi } else { v }
+}
+
+pub fn banner() -> *const c_char { text::shout("keen") }

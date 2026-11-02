@@ -1,0 +1,6 @@
+use <stdio.h>;
+
+pub fn main() -> i32 {
+    printf("hello from keen\n");
+    return 0;
+}

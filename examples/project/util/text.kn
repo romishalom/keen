@@ -1,0 +1,1 @@
+pub fn shout(s: *const c_char) -> *const c_char { "KEEN PROJECT" }

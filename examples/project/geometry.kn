@@ -1,0 +1,5 @@
+pub struct Rect { w: i32, h: i32 }
+
+pub fn make_rect(w: i32, h: i32) -> Rect { Rect { w, h } }
+pub fn area(r: *const Rect) -> i32 { r->w * r->h }
+pub fn perimeter(r: *const Rect) -> i32 { 2 * (r->w + r->h) }

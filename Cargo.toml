@@ -1,0 +1,21 @@
+[package]
+name = "keen"
+version = "0.2.1"
+edition = "2021"
+description = "keen: a lightweight Rust-syntax to C transpiler (syntax only, no safety enforcement)"
+license = "MIT"
+
+[lib]
+name = "keen"
+path = "src/lib.rs"
+
+[[bin]]
+name = "keen"
+path = "src/main.rs"
+
+[dependencies]
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true

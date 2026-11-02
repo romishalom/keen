@@ -1,0 +1,188 @@
+use <stdio.h>;
+use <stdlib.h>;
+use <string.h>;
+use <stdarg.h>;
+
+c!("#define ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))");
+
+const MAX: usize = 8;
+static mut counter: i32 = 0;
+pub static mut errors: i32 = 0;
+static greeting: *const c_char = "hi";
+
+struct Point { x: i32, y: i32 }
+
+struct Header {
+    kind: u8,
+    flags: u32: 3,
+    len: u32: 13,
+}
+
+struct Variant {
+    tag: i32,
+    union {
+        i: i32,
+        f: f32,
+    },
+    inner: struct { a: i32, b: i32 },
+}
+
+union Bits { u: u32, f: f32 }
+
+enum Color { Red, Green = 5, Blue }
+
+type Callback = fn(i32) -> i32;
+type Row = [i32; 3];
+
+static_assert (sizeof(Point) == 8, "Point must be 8 bytes");
+
+impl Point {
+    const ORIGIN: i32 = 0;
+    pub fn new(x: i32, y: i32) -> Point { Point { x, y } }
+    pub fn dist2(p: *const Point) -> i32 { p->x * p->x + p->y * p->y }
+}
+
+mod math {
+    pub fn square(x: i32) -> i32 { x * x }
+    pub fn cube(x: i32) -> i32 { x * math::square(x) }
+    pub fn both(x: i32) -> i32 { square(x) + cube(x) }
+}
+
+mod util {
+    pub mod inner {
+        pub fn twice(x: i32) -> i32 { x * 2 }
+    }
+}
+
+use util::inner::twice;
+use math::cube as c3;
+
+fn sign(x: i32) -> i32 {
+    if x < 0 { -1 } else if x > 0 { 1 } else { 0 }
+}
+
+fn pick(c: Color) -> i32 {
+    match c {
+        Color::Red => 10,
+        Color::Green | Color::Blue => 20,
+        _ => 0,
+    }
+}
+
+fn apply(f: Callback, v: i32) -> i32 { f(v) }
+
+fn sum_all(n: i32, ...) -> i32 {
+    let mut ap: va_list;
+    va_start(ap, n);
+    let mut total: i32 = 0;
+    for let mut i: i32 = 0; i < n; i += 1 {
+        total += va_arg(ap, i32);
+    }
+    va_end(ap);
+    total
+}
+
+fn fatal(msg: *const c_char) -> !{
+    puts(msg);
+    exit(1);
+}
+
+#[inline]
+fn max_of(a: i32, b: i32) -> i32 { if a > b { a } else { b } }
+
+fn fall(n: i32) -> i32 {
+    let mut r: i32 = 0;
+    match n {
+        #[fallthrough]
+        1 => {
+            r += 1;
+        }
+        2 => {
+            r += 10;
+        }
+        _ => {
+            r = -1;
+        }
+    }
+    r
+}
+
+fn find_first_neg(a: *const i32, n: i32) -> i32 {
+    let mut idx: i32 = -1;
+    for i in 0..n {
+        match a[i] {
+            -1 | -2 | -3 => {
+                idx = i as i32;
+                break;
+            }
+            _ => {}
+        }
+    }
+    idx
+}
+
+pub fn main() -> i32 {
+    let p = Point::new(3, 4);
+    printf("dist2=%d origin=%d\n", Point::dist2(&p), Point::ORIGIN);
+
+    let arr: [i32; 5] = [5, 3, -2, 7, 1];
+    let zeros: [i32; 4] = [0; 4];
+    printf("len=%zu first_neg=%d zero0=%d\n", ARRAY_LEN(arr), find_first_neg(arr, 5), zeros[0]);
+
+    let m = max_of(3, 9);
+    let s = if m > 5 { 100 } else { 200 };
+    printf("max=%d s=%d sign=%d %d %d\n", m, s, sign(-5), sign(0), sign(9));
+    printf("pick=%d %d\n", pick(Color::Red), pick(Color::Blue));
+    printf("fall=%d %d %d\n", fall(1), fall(2), fall(3));
+    printf("math=%d %d %d\n", math::both(3), c3(2), twice(21));
+    printf("sum=%d\n", sum_all(3, 10, 20, 30));
+    printf("apply=%d\n", apply(math::square, 7));
+
+    let mut v: Variant = Variant {};
+    v.tag = 1;
+    v.i = 42;
+    v.inner.a = 7;
+    printf("variant=%d %d %d\n", v.tag, v.i, v.inner.a);
+
+    let mut h: Header = Header { kind: 3, flags: 5, len: 1000 };
+    h.flags = 2;
+    printf("hdr=%d %d %d\n", h.kind as i32, h.flags as i32, h.len as i32);
+
+    let mut b: Bits = Bits { f: 1.0f32 };
+    b.u += 0;
+    printf("bits=%x\n", b.u);
+
+    let mut i: i32 = 0;
+    do {
+        i += 1;
+    } while i < 5;
+
+    let mut j: i32 = 0;
+    loop {
+        j += 2;
+        if j > 7 {
+            break;
+        }
+    }
+    static mut calls: i32 = 0;
+    calls += 1;
+    counter += i + j + calls;
+    printf("i=%d j=%d counter=%d\n", i, j, counter);
+
+    let mut k: i32 = 0;
+    'again: k += 1;
+    if k < 3 {
+        goto 'again;
+    }
+    printf("k=%d MAX=%zu %s %d\n", k, MAX, greeting, 1 + 2 * 3 - (4 & 6 == 4) as i32);
+
+    let cs: *const c_char = r#"raw "quoted""#;
+    puts(cs);
+    c!("printf(\"raw c statement\\n\");");
+    let sh: u32 = (1u32 << 4) | 0b1010 | 0o17 | 0xFF;
+    printf("%u %d\n", sh, -(-3));
+    if errors != 0 {
+        fatal("errors");
+    }
+    return 0;
+}

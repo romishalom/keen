@@ -1,0 +1,94 @@
+use <stdio.h>;
+use <stdlib.h>;
+use <string.h>;
+
+c!("#define MAX_NAME 32");
+
+#[cfg(DEBUG)]
+fn trace(msg: *const c_char) {
+    fprintf(stderr, "trace: %s\n", msg);
+}
+#[cfg(not(DEBUG))]
+fn trace(msg: *const c_char) {}
+
+enum Kind { Leaf, Branch }
+
+struct Node {
+    kind: Kind,
+    name: [c_char; 32],
+    left: *mut Node,
+    right: *mut Node,
+}
+
+type Visit = fn(*mut Node) -> bool;
+
+impl Node {
+    pub fn new(kind: Kind, name: *const c_char) -> *mut Node {
+        let n = calloc(1, sizeof(Node)) as *mut Node;
+        n->kind = kind;
+        strncpy(n->name, name, MAX_NAME - 1);
+        n
+    }
+
+    pub fn walk(n: *mut Node, visit: Visit) -> usize {
+        if n == NULL {
+            return 0;
+        }
+        let mut count: usize = 0;
+        if visit(n) {
+            count += 1;
+        }
+        count += Node::walk(n->left, visit);
+        count += Node::walk(n->right, visit);
+        count
+    }
+}
+
+fn print_leaf(n: *mut Node) -> bool {
+    match n->kind {
+        Kind::Leaf => {
+            printf("leaf %s\n", n->name);
+            true
+        }
+        _ => false,
+    }
+}
+
+static mut visited: usize = 0;
+
+fn classify(c: c_int) -> i32 {
+    match c {
+        '0'..='9' => 1,
+        'a'..='z' | 'A'..='Z' => 2,
+        _ => 0,
+    }
+}
+
+pub fn main(argc: i32, argv: *mut *mut c_char) -> i32 {
+    let root = Node::new(Kind::Branch, "root");
+    root->left = Node::new(Kind::Leaf, "a");
+    root->right = Node::new(Kind::Leaf, "b");
+
+    trace("walking");
+    visited = Node::walk(root, print_leaf);
+
+    let mut seen: i32 = 0;
+    'scan: for i in 0..argc {
+        for j in 0..3 {
+            if classify(argv[i][j] as c_int) == 0 {
+                continue 'scan;
+            }
+            if argv[i][j] == 'x' {
+                break 'scan;
+            }
+            seen += 1;
+        }
+    }
+
+    let mut total: i32 = 0;
+    for let mut k: i32 = 10; k > 0; k -= 3 {
+        total += k;
+    }
+    printf("%zu %d %d\n", visited, total, seen);
+    return 0;
+}
