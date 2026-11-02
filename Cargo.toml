@@ -5,6 +5,13 @@ edition = "2021"
 description = "keen: a lightweight Rust-syntax to C transpiler (syntax only, no safety enforcement)"
 license = "MIT"
 
+authors = ["Romi Shalom <romishalom01@gmail.com>"]
+repository = "https://github.com/romishalom/keen"
+documentation = "https://docs.rs/keen"
+readme = "README.md"
+keywords = ["cli", "language", "c", "syntax", "compiler"]
+categories = ["command-line-interface", "development-tools::compilers", "parsers", "text-processing"]
+
 [lib]
 name = "keen"
 path = "src/lib.rs"
