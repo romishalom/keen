@@ -9,7 +9,7 @@ repository = "https://github.com/romishalom/keen"
 documentation = "https://docs.rs/keen-lang"
 readme = "README.md"
 keywords = ["cli", "language", "c", "syntax", "compiler"]
-categories = ["command-line-interface", "parser-implementations", "compiers"]
+categories = ["command-line-interface", "parser-implementations", "compilers"]
 
 [lib]
 name = "keen"
