@@ -1,12 +1,12 @@
 [package]
-name = "keen"
+name = "keen-lang"
 version = "0.2.1"
 edition = "2021"
 description = "keen: a lightweight Rust-syntax to C transpiler (syntax only, no safety enforcement)"
 license = "MIT"
 authors = ["Romi Shalom <romishalom01@gmail.com>"]
 repository = "https://github.com/romishalom/keen"
-documentation = "https://docs.rs/keen"
+documentation = "https://docs.rs/keen-lang"
 readme = "README.md"
 keywords = ["cli", "language", "c", "syntax", "compiler"]
 categories = ["command-line-interface", "development-tools::compilers", "parsers", "text-processing"]
