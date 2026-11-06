@@ -1,0 +1,5 @@
+# Shell scripts must keep LF line endings (CRLF breaks `sh`).
+*.sh text eol=lf
+scripts/* text eol=lf
+*.kn text
+*.rs text
