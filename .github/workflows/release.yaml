@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-package:
+    name: Package (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: macos-latest
+            target: x86_64-apple-darwin
+          - os: macos-latest
+            target: aarch64-apple-darwin
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build binaries
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Run package-release.sh
+        shell: bash
+        run: |
+          chmod +x scripts/package-release.sh
+          
+          # Handle Windows binary extensions (.exe) if building on windows runner
+          if [[ "${{ matrix.target }}" == *-windows-* ]]; then
+            # package-release.sh expects non-.exe names or we can copy/rename them to match expectation
+            mv target/${{ matrix.target }}/release/keen.exe target/${{ matrix.target }}/release/keen
+            mv target/${{ matrix.target }}/release/whet.exe target/${{ matrix.target }}/release/whet
+          fi
+
+          # Run your script with the target and skip-build (since we already built above)
+          ./scripts/package-release.sh --target ${{ matrix.target }} --skip-build --out dist
+
+          # Restore .exe extension for Windows upload assets if necessary
+          if [[ "${{ matrix.target }}" == *-windows-* ]]; then
+            mv target/${{ matrix.target }}/release/keen target/${{ matrix.target }}/release/keen.exe
+            mv target/${{ matrix.target }}/release/whet target/${{ matrix.target }}/release/whet.exe
+            # Also rename the whet binary inside the dist folder to include .exe if whet expects it per install.md
+            mv dist/whet/${{ github.ref_name#v }}/whet-${{ matrix.target }} dist/whet/${{ github.ref_name#v }}/whet-${{ matrix.target }}.exe
+            # Re-generate checksum for the renamed windows whet binary
+            (cd dist/whet/${{ github.ref_name#v }} && sha256sum whet-${{ matrix.target }}.exe > whet-${{ matrix.target }}.exe.sha256)
+            rm dist/whet/${{ github.ref_name#v }}/whet-${{ matrix.target }}.sha256
+          fi
+
+      - name: Upload artifact fragment
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.target }}
+          path: dist/*
+
+  release:
+    name: Publish GitHub Release
+    needs: build-and-package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifact fragments
+        uses: actions/download-artifact@v4
+        with:
+          path: all-dist
+
+      - name: Merge all dist folders
+        run: |
+          mkdir -p final-dist
+          # Merge all platform subfolders into one unified release directory structure
+          cp -r all-dist/dist-*/* final-dist/ || true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "v0.3.0 - Initial Release"
+          body_path: RELEASE_NOTES.md
+          files: |
+            final-dist/**/*
+          draft: false
+          prerelease: false
