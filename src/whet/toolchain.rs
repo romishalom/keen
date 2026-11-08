@@ -36,11 +36,13 @@ impl Ctx {
 /// `latest` asks the dist server; anything else must look like a version.
 pub fn resolve(ctx: &Ctx, spec: &str) -> Result<String, String> {
     if spec == "latest" || spec == "stable" {
-        let text = net::fetch_text(&format!("{}/latest", ctx.dist.trim_end_matches('/')))
+        // GitHub release download URL for the 'latest' asset file
+        let url = format!("{}/latest/download/latest", ctx.dist.trim_end_matches('/'));
+        let text = net::fetch_text(&url)
             .map_err(|e| format!("cannot determine the latest version: {}", e))?;
         let v = text.lines().next().unwrap_or("").trim().to_string();
         if !platform::valid_version(&v) {
-            return Err(format!("the dist server returned an invalid version `{}`", v));
+            return Err(format!("the release returned an invalid version `{}`", v));
         }
         return Ok(v);
     }
@@ -91,7 +93,9 @@ pub fn install(ctx: &Ctx, version: &str, force: bool) -> Result<bool, String> {
     }
     let dist = ctx.dist.trim_end_matches('/');
     let name = format!("keen-{}-{}", version, ctx.target);
-    let url = format!("{}/keen/{}/{}.tar.gz", dist, version, name);
+    
+     // GitHub releases URL format: /releases/download/v<version>/<filename>
+    let url = format!("{}/download/v{}/{}.tar.gz", dist, version, name);
     let work = ctx.tmp_dir().join(format!("install-{}-{}", version, std::process::id()));
     let _ = fs::remove_dir_all(&work);
     fs::create_dir_all(&work).map_err(|e| format!("cannot create `{}`: {}", work.display(), e))?;
@@ -100,7 +104,7 @@ pub fn install(ctx: &Ctx, version: &str, force: bool) -> Result<bool, String> {
         ui::info(&format!("downloading keen {} ({})", version, ctx.target));
         net::fetch(&url, &archive, !ui::quiet() && std::io::IsTerminal::is_terminal(&std::io::stderr())).map_err(|e| {
             format!(
-                "{}\n       (is {} published for target {}? check `whet toolchain list` and the dist server)",
+                "{}\n       (is {} published for target {}? check `whet toolchain list` and GitHub releases)",
                 e, version, ctx.target
             )
         })?;

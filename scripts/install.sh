@@ -1,12 +1,12 @@
 #!/bin/sh
 # whet: the keen installer (bootstrap script)
 #
-#   curl --proto '=https' --tlsv1.2 -sSf https://keen-lang.org/install.sh | sh
+#   curl --proto '=https' --tlsv1.2 -sSf https://github.com/romishalom/keen/releases/latest/download/install.sh | sh
 #
 # Pass options to the installer after `-s --`:
 #
 #   curl ... | sh -s -- -y                                  # no prompts, all defaults
-#   curl ... | sh -s -- --default-toolchain 0.2.1 --profile minimal --no-modify-path
+#   curl ... | sh -s -- --default-toolchain 0.3.0 --profile minimal --no-modify-path
 #
 # This script only downloads `whet` (verifying its SHA-256) and runs `whet init`, which does the
 # real work. Run `whet help init` afterwards for every option.
@@ -16,7 +16,7 @@
 
 set -u
 
-DIST="${WHET_DIST_SERVER:-https://keen-lang.org/dist}"
+DIST="${WHET_DIST_SERVER:-https://github.com/romishalom/keen/releases}"
 DIST="${DIST%/}"
 
 say() { printf 'whet-install: %s\n' "$1" >&2; }
@@ -33,7 +33,7 @@ USAGE:
 
 Everything after the script name is passed to `whet init`, for example:
     -y                          accept the defaults, no prompts
-    --default-toolchain <v>     latest (default), a version like 0.2.1, or none
+    --default-toolchain <v>     latest (default), a version like 0.3.0, or none
     --profile <default|minimal> keen + completions, or keen only
     --no-modify-path            leave shell profiles alone
     --prefix <dir>              install somewhere other than ~/.keen
@@ -141,7 +141,8 @@ main() {
 
     version="${WHET_VERSION:-}"
     if [ -z "$version" ]; then
-        download "$DIST/latest" "$tmp/latest"
+        # GitHub releases latest download endpoint for the 'latest' asset file
+        download "$DIST/latest/download/latest" "$tmp/latest"
         version=$(head -n 1 "$tmp/latest" | tr -d '\r\n ')
     fi
     case "$version" in
@@ -149,7 +150,8 @@ main() {
     esac
 
     say "downloading whet $version for $target"
-    url="$DIST/whet/$version/whet-$target$ext"
+    # GitHub releases flat asset layout: /releases/download/v<version>/<filename>
+    url="$DIST/download/v$version/whet-$target$ext"
     download "$url" "$tmp/whet$ext"
     download "$url.sha256" "$tmp/whet.sha256"
 

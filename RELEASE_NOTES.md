@@ -50,19 +50,19 @@ The primary command-line tool for project initialization, compilation, testing, 
 Run the bootstrap script to install `whet` and the `v0.3.0` release into `~/.keen`:
 
 ```sh
-curl --proto '=https' --tlsv1.2 -sSf https://keen-lang.org/install.sh | sh
+curl --proto '=https' --tlsv1.2 -sSf https://github.com/romishalom/keen/releases/latest/download/install.sh | sh
 ```
 
 For unattended / CI environments:
 
 ```sh
-curl --proto '=https' --tlsv1.2 -sSf https://keen-lang.org/install.sh | sh -s -- -y --default-toolchain 0.3.0 --profile minimal
+curl --proto '=https' --tlsv1.2 -sSf https://github.com/romishalom/keen/releases/latest/download/install.sh | sh -s -- -y --default-toolchain 0.3.0 --profile minimal
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://keen-lang.org/install.ps1 | iex
+irm https://github.com/romishalom/keen/releases/latest/download/install.ps1 | iex
 ```
 
 ### Building From Source

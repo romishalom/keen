@@ -7,7 +7,7 @@ there is none and tells you how to get one.
 ## The easy way
 
 ```sh
-curl --proto '=https' --tlsv1.2 -sSf https://keen-lang.org/install.sh | sh
+curl --proto '=https' --tlsv1.2 -sSf https://github.com/romishalom/keen/releases/latest/download/install.sh | sh
 ```
 
 You get a short menu; press **Enter** to accept the standard installation:
@@ -21,7 +21,7 @@ Current installation options:
    default toolchain:   latest (resolved at install time)
    profile:             default
    modify PATH:         yes
-   dist server:         https://keen-lang.org/dist
+   dist server:         https://github.com/romishalom/keen/releases
 
 1) Proceed with standard installation (default - just press enter)
 2) Customize installation
@@ -38,10 +38,9 @@ keen new hello && cd hello && keen run
 No prompts, for scripts and CI: `curl ... | sh -s -- -y`.
 
 Windows (PowerShell, not yet tested on a real machine):
-`irm https://keen-lang.org/install.ps1 | iex`
+`irm https://github.com/romishalom/keen/releases/latest/download/install.ps1 | iex`
 
-> The host name above is a placeholder. Releases are plain static files, so any web server works;
-> see [Publishing releases](#publishing-releases) to point the scripts at yours.
+> Releases are hosted directly on GitHub Releases (https://github.com/romishalom/keen/releases).
 
 ## The advanced way
 
@@ -62,7 +61,7 @@ Everything after `sh -s --` goes to `whet init`:
 
 ```sh
 # pinned, minimal, system-wide-ish, no shell edits
-curl --proto '=https' --tlsv1.2 -sSf https://keen-lang.org/install.sh | \
+curl --proto '=https' --tlsv1.2 -sSf https://github.com/romishalom/keen/releases/latest/download/install.sh | \
     sh -s -- -y --default-toolchain 0.2.1 --profile minimal --no-modify-path --prefix /opt/keen
 
 # fully offline, from a directory of release files
@@ -127,24 +126,3 @@ are refused, and plain `http://` to a remote host is rejected.
 - **another `keen` earlier on PATH** (for example from `cargo install`): whet warns about it; put
   `~/.keen/bin` first.
 - **behind a proxy**: whet uses `curl`/`wget`, so `https_proxy` etc. are honoured.
-
-## Publishing releases
-
-`scripts/package-release.sh` builds a release and writes the layout `whet` and `install.sh` expect:
-
-```
-<out>/latest                                 newest version, one line
-<out>/install.sh  <out>/install.ps1          the bootstrap scripts
-<out>/keen/<ver>/keen-<ver>-<target>.tar.gz  toolchain archive (+ .sha256)
-<out>/whet/<ver>/whet-<target>[.exe]         manager binary (+ .sha256)
-```
-
-```sh
-WHET_DEFAULT_DIST_SERVER=https://downloads.example.org/keen \
-    sh scripts/package-release.sh --out dist            # builds with your server baked in
-# repeat on each platform (or with --target), then upload dist/ to the server
-```
-
-Set the same URL as the default in `scripts/install.sh` / `install.ps1` (the `DIST=` line) or have
-users export `WHET_DIST_SERVER`. Targets look like `x86_64-unknown-linux-gnu`,
-`aarch64-apple-darwin`, `x86_64-unknown-linux-musl`.

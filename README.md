@@ -30,16 +30,15 @@ $ keen run point.kn
 ## Install
 
 ```sh
-curl --proto '=https' --tlsv1.2 -sSf https://keen-lang.org/install.sh | sh     # press Enter for the defaults
-curl ... | sh -s -- -y --default-toolchain 0.2.1 --profile minimal             # advanced / unattended
+curl --proto '=https' --tlsv1.2 -sSf https://github.com/romishalom/keen/releases/latest/download/install.sh | sh # press Enter for the defaults
+curl ... | sh -s -- -y --default-toolchain 0.2.1 --profile minimal # advanced / unattended
 ```
 
 That installs **whet** (the toolchain manager, as in *whetstone*) and the latest keen into `~/.keen`,
 adds it to your PATH, and warns if no C compiler is installed. Afterwards: `whet update`,
 `whet default <version>` (rollback), `whet self uninstall`. Everything is documented in
 [`docs/INSTALL.md`](docs/INSTALL.md), including how to host your own releases
-(`scripts/package-release.sh`). The `keen-lang.org` host in the scripts is a placeholder until a
-release server exists.
+(`scripts/package-release.sh`). Releases are hosted directly on GitHub (https://github.com/romishalom/keen/releases).
 
 From source instead:
 

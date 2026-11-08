@@ -28,7 +28,7 @@ use toolchain::Ctx;
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const DEFAULT_DIST: &str = match option_env!("WHET_DEFAULT_DIST_SERVER") {
     Some(s) => s,
-    None => "https://keen-lang.org/dist",
+    None => "https://github.com/romishalom/keen/releases",
 };
 
 const OVERVIEW: &str = "\
@@ -720,7 +720,8 @@ fn self_update(o: &Opts) -> i32 {
         return 0;
     }
     let file = Ctx::exe(&format!("whet-{}", ctx.target));
-    let url = format!("{}/whet/{}/{}", ctx.dist, latest, file);
+    // GitHub releases flat asset download path
+    let url = format!("{}/download/v{}/{}", ctx.dist.trim_end_matches('/'), latest, file);
     let tmp = ctx.bin_dir().join(".whet.update");
     let r = std::fs::create_dir_all(ctx.bin_dir()).map_err(|e| e.to_string()).and_then(|_| {
         ui::info(&format!("downloading whet {}", latest));

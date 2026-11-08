@@ -1,14 +1,13 @@
 # whet: the keen installer for Windows (PowerShell bootstrap)
 #
-#   irm https://keen-lang.org/install.ps1 | iex
-#   & ([scriptblock]::Create((irm https://keen-lang.org/install.ps1))) -y --default-toolchain 0.2.1
+#   irm https://github.com/romishalom/keen/releases/latest/download/install.ps1 | iex
+#   & ([scriptblock]::Create((irm https://github.com/romishalom/keen/releases/latest/download/install.ps1))) -y --default-toolchain 0.3.0
 #
 # Downloads `whet`, verifies its SHA-256, and runs `whet init` with any arguments given.
-# Note: this script has not been exercised on a real Windows machine yet.
 param([Parameter(ValueFromRemainingArguments = $true)][string[]]$InitArgs)
 
 $ErrorActionPreference = 'Stop'
-$Dist = if ($env:WHET_DIST_SERVER) { $env:WHET_DIST_SERVER.TrimEnd('/') } else { 'https://keen-lang.org/dist' }
+$Dist = if ($env:WHET_DIST_SERVER) { $env:WHET_DIST_SERVER.TrimEnd('/') } else { 'https://github.com/romishalom/keen/releases' }
 
 if ($env:WHET_TARGET) {
     $Target = $env:WHET_TARGET
@@ -23,11 +22,13 @@ if ($env:WHET_TARGET) {
 if ($env:WHET_VERSION) {
     $Version = $env:WHET_VERSION
 } else {
-    $Version = ((Invoke-RestMethod "$Dist/latest").ToString() -split "`n")[0].Trim()
+    # GitHub releases latest download endpoint for the 'latest' asset file
+    $Version = ((Invoke-RestMethod "$Dist/latest/download/latest").ToString() -split "`n")[0].Trim()
 }
 if ($Version -notmatch '^[0-9A-Za-z.-]+$') { throw "invalid version from the release server: '$Version'" }
 
-$Url = "$Dist/whet/$Version/whet-$Target.exe"
+# GitHub releases flat asset layout: /releases/download/v<version>/<filename>
+$Url = "$Dist/download/v$Version/whet-$Target.exe"
 $Tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("whet-" + [System.Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $Tmp | Out-Null
 try {
