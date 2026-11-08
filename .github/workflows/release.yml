@@ -47,19 +47,21 @@ jobs:
           # Run your script
           ./scripts/package-release.sh --target ${{ matrix.target }} --out dist
 
-          # Safely handle Windows .exe extension and checksums if building on Windows
+          # Safely handle Windows .exe extension and checksums
           if [[ "${{ matrix.target }}" == *-windows-* ]]; then
-            WHET_FILE="dist/whet/$VERSION/whet-${{ matrix.target }}"
+            TARGET_FILE="dist/whet/$VERSION/whet-${{ matrix.target }}"
+            EXE_FILE="${TARGET_FILE}.exe"
             
-            # If the file was packaged without .exe, append it
-            if [ -f "$WHET_FILE" ]; then
-              mv "$WHET_FILE" "${WHET_FILE}.exe"
+            # Only rename if the non-exe file exists and the .exe version doesn't
+            if [ -f "$TARGET_FILE" ] && [ ! -f "$EXE_FILE" ]; then
+              mv "$TARGET_FILE" "$EXE_FILE"
             fi
             
             # Generate the correct .sha256 for the .exe file
-            if [ -f "${WHET_FILE}.exe" ]; then
-              (cd dist/whet/$VERSION && sha256sum whet-${{ matrix.target }}.exe > whet-${{ matrix.target }}.exe.sha256)
-              rm -f dist/whet/$VERSION/whet-${{ matrix.target }}.sha256
+            if [ -f "$EXE_FILE" ]; then
+              (cd dist/whet/$VERSION && sha256sum "$(basename "$EXE_FILE")" > "$(basename "$EXE_FILE").sha256")
+              # Remove the old non-exe checksum file if it was created
+              rm -f "${TARGET_FILE}.sha256"
             fi
           fi
 
