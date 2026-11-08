@@ -41,25 +41,20 @@ jobs:
         run: |
           chmod +x scripts/package-release.sh
           
-          # Extract version cleanly (stripping leading 'v')
+          # Extract version
           VERSION="${GITHUB_REF#refs/tags/v}"
           
-          # Handle Windows binary extensions (.exe) if building on windows runner
+          # Handle Windows binary extensions if applicable
           if [[ "${{ matrix.target }}" == *-windows-* ]]; then
-            mv target/${{ matrix.target }}/release/keen.exe target/${{ matrix.target }}/release/keen
-            mv target/${{ matrix.target }}/release/whet.exe target/${{ matrix.target }}/release/whet
-          fi
-
-          # Run your script
-          ./scripts/package-release.sh --target ${{ matrix.target }} --skip-build --out dist
-
-          # Restore .exe extension and fix checksums for Windows if necessary
-          if [[ "${{ matrix.target }}" == *-windows-* ]]; then
-            mv target/${{ matrix.target }}/release/keen target/${{ matrix.target }}/release/keen.exe
-            mv target/${{ matrix.target }}/release/whet target/${{ matrix.target }}/release/whet.exe
+            # Windows compilation step if needed
+            ./scripts/package-release.sh --target ${{ matrix.target }} --out dist
+            # Rename for Windows packaging layout
             mv dist/whet/$VERSION/whet-${{ matrix.target }} dist/whet/$VERSION/whet-${{ matrix.target }}.exe
             (cd dist/whet/$VERSION && sha256sum whet-${{ matrix.target }}.exe > whet-${{ matrix.target }}.exe.sha256)
             rm dist/whet/$VERSION/whet-${{ matrix.target }}.sha256
+          else
+            # For Linux and macOS, package-release.sh handles building and packaging automatically
+            ./scripts/package-release.sh --target ${{ matrix.target }} --out dist
           fi
 
       - name: Upload artifact fragment
