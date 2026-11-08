@@ -51,7 +51,7 @@ jobs:
           fi
 
           # Run your script
-          ./scripts/package-release.sh --target ${{ matrix.target }}--skip-build --out dist
+          ./scripts/package-release.sh --target ${{ matrix.target }} --skip-build --out dist
 
           # Restore .exe extension and fix checksums for Windows if necessary
           if [[ "${{ matrix.target }}" == *-windows-* ]]; then
