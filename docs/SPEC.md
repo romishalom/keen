@@ -1337,3 +1337,25 @@ against GCC 13.
 - **Line endings.** Sources may use LF or CRLF; the lexer normalizes `\r\n` to `\n` before anything
   else, so a multi-line raw string or `c!` block has the same value in both. `keen fmt` keeps the
   file's existing style. Generated C and generated project files use LF.
+
+## Appendix C. Installer (whet, keen 0.3)
+
+- **whet** is the installer and toolchain manager (a separate binary in the same package); see
+  `docs/INSTALL.md` for the user guide. It is dependency-free: SHA-256 is implemented in Rust,
+  downloads shell out to `curl`/`wget` (and `file://` URLs are copied directly), archives are
+  unpacked with the system `tar`.
+- **Home.** `~/.keen` (or `$KEEN_HOME`, `--prefix`): `bin/keen` is a symlink into
+  `toolchains/<version>/bin/keen`, so switching the default is atomic and costs nothing at run time.
+  `settings.toml` records the default toolchain, the dist server and every file outside the home that
+  was created or edited, so `whet self uninstall` can undo all of it.
+- **Release layout.** `latest`, `keen/<ver>/keen-<ver>-<target>.tar.gz`, `whet/<ver>/whet-<target>`,
+  each artifact next to a `.sha256`. A toolchain archive unpacks to `keen-<ver>-<target>/bin/keen`
+  (+ `share/`). Archives containing absolute or `..` paths are refused.
+- **Safety.** Every download is verified; `http://` is accepted only for loopback hosts (or with
+  `WHET_ALLOW_HTTP=1`); profile edits are a delimited, idempotent block; whet refuses to delete a
+  directory that has no `settings.toml`.
+- **Bootstrap.** `install.sh` (POSIX sh) detects the platform, downloads and verifies `whet`, then
+  runs `whet init` with the user's arguments, reading prompts from `/dev/tty` when invoked through a
+  pipe. `install.ps1` is the PowerShell equivalent (untested on real Windows).
+- **Limits.** Automatic PATH setup is Unix-only for now; per-project toolchain pinning is not
+  implemented (use `whet run <version> keen ...`).

@@ -29,9 +29,23 @@ $ keen run point.kn
 
 ## Install
 
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://keen-lang.org/install.sh | sh     # press Enter for the defaults
+curl ... | sh -s -- -y --default-toolchain 0.2.1 --profile minimal             # advanced / unattended
 ```
-cargo build --release          # binary: target/release/keen   (needs gcc or clang to build/run .kn)
-cargo test                     # 93 tests; builds and runs real programs with gcc (and clang if present)
+
+That installs **whet** (the toolchain manager, as in *whetstone*) and the latest keen into `~/.keen`,
+adds it to your PATH, and warns if no C compiler is installed. Afterwards: `whet update`,
+`whet default <version>` (rollback), `whet self uninstall`. Everything is documented in
+[`docs/INSTALL.md`](docs/INSTALL.md), including how to host your own releases
+(`scripts/package-release.sh`). The `keen-lang.org` host in the scripts is a placeholder until a
+release server exists.
+
+From source instead:
+
+```
+cargo build --release          # binaries: target/release/keen and target/release/whet
+cargo test                     # builds and runs real programs with gcc (and clang if present)
 ```
 
 Shell completions: `source <(keen completions bash)`, `keen completions zsh > ~/.zfunc/_keen`,
@@ -174,5 +188,9 @@ src/driver.rs      C compiler detection, module discovery, build/check/run, incr
 src/manifest.rs    keen.toml (tiny TOML subset)             src/explain.rs   `keen explain` texts
 src/cli.rs         argument parsing and help                src/completions.rs   shell completions
 src/main.rs        command dispatch, projects, fmt, test, watch
-tests/             transpiler, formatter, CLI, project and example tests
+src/whet/          whet, the installer/manager: main.rs (commands, menu), toolchain.rs, shell.rs,
+                   net.rs, settings.rs, platform.rs, sha256.rs, ui.rs
+scripts/           install.sh, install.ps1 (bootstrap), package-release.sh (build the release layout)
+docs/INSTALL.md    installer and whet documentation
+tests/             transpiler, formatter, CLI, project, example and installer (whet) tests
 ```
