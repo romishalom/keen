@@ -361,7 +361,7 @@ impl<'a> Emitter<'a> {
                 return;
             }
         }
-        let s = format!("#line {} \"{}\"\n", line, self.opts.file);
+        let s = format!("#line {} \"{}\"\n", line, self.opts.file.replace("\\", "\\\\"));
         self.out.push_str(&s);
         self.map_base = Some((k + 1, line));
     }
