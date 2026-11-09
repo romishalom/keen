@@ -103,4 +103,4 @@ keen run point.kn
 
 ## Feedback & Contributions
 
-Since this is the inaugural release, we welcome your feedback, bug reports, and suggestions! Please open an issue on our repository or check out our documentation files in `docs/` for details on language specifications and toolchain deployment.
+Since this is the inaugural release, we welcome your feedback, bug reports, and suggestions! Please open an issue on our repository or check out our documentation files in `docs/` for details on language specifications and toolchain deployment. 
