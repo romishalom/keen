@@ -37,8 +37,10 @@ keen new hello && cd hello && keen run
 
 No prompts, for scripts and CI: `curl ... | sh -s -- -y`.
 
-Windows (PowerShell, not yet tested on a real machine):
-`irm https://github.com/romishalom/keen/releases/latest/download/install.ps1 | iex`
+For Windows PowerShell:
+```ps1
+irm https://github.com/romishalom/keen/releases/latest/download/install.ps1 | iex
+```
 
 > Releases are hosted directly on GitHub Releases (https://github.com/romishalom/keen/releases).
 
